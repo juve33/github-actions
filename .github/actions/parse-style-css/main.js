@@ -69,7 +69,7 @@ try {
 } catch (e) {}
 
 
-
+console.log(`previous version=${previous.version}`);
 const changed = current.version !== previous.version;
 
 
