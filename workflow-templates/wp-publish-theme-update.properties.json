@@ -1,0 +1,8 @@
+{
+    "name": "Publish new theme version",
+    "description": "Creates a new release and provides the release to WordPress installations.",
+    "iconName": "octicon arrow-up",
+    "filePatterns": [
+        "style.css$"
+    ]
+}
