@@ -1,0 +1,18 @@
+name: Parse style.css
+description: Extracts WordPress theme metadata
+
+outputs:
+  version:
+    description: The version of the theme
+  changed:
+    description: Whether version changed
+  requires:
+    description: The oldest main WordPress version the theme will work with
+  tested:
+    description: The last main WordPress version the theme has been tested up to
+  text_domain:
+    description: The string used for textdomain for translation
+
+runs:
+  using: node20
+  main: main.js
