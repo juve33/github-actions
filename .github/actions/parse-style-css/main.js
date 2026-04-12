@@ -32,12 +32,10 @@ function parseTheme(content) {
 }
 
 function setOutput(name, value) {
-    const filePath = process.env['GITHUB_OUTPUT'] || '';
-    if (filePath) {
-        return file_command_issueFileCommand('OUTPUT', file_command_prepareKeyValueMessage(name, value));
-    }
-    process.stdout.write(external_os_.EOL);
-    command_issueCommand('set-output', { name }, utils_toCommandValue(value));
+  require('fs').appendFileSync(
+    process.env.GITHUB_OUTPUT,
+    `${name}=${value}\n`
+  );
 }
 
 
