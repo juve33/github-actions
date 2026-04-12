@@ -1,0 +1,128 @@
+name: Publish new theme version
+description: Creates a new release and provides the release to WordPress installations
+
+on:
+  workflow_call:
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  read-style-css:
+    name: Read style.css
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      version: ${{ steps.parse-style-css.outputs.version }}
+      changed: ${{ steps.parse-style-css.outputs.changed }}
+      requires: ${{ steps.parse-style-css.outputs.requires }}
+      tested: ${{ steps.parse-style-css.outputs.tested }}
+      text_domain: ${{ steps.parse-style-css.outputs.text_domain }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 2
+      - name: Parse style.css
+        id: parse-style-css
+        uses: juve33/workflows/.github/actions/wp-parse-style-css@main
+
+  create-release:
+    name: Create Release
+    needs: [ read-style-css ]
+    if: ${{ needs.read-style-css.outputs.changed == 'true' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ needs.read-style-css.outputs.version }}
+          release_name: ${{ needs.read-style-css.outputs.version }}
+          draft: false
+          prerelease: false
+
+  build:
+    name: Build
+    needs: [ read-style-css, create-release ]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Install GitHub CLI
+        run: sudo apt-get install gh -y
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Create zip
+        run: git archive --prefix=${{ needs.read-style-css.outputs.text_domain }}/ -o ${{ needs.read-style-css.outputs.text_domain }}.zip HEAD
+      - name: Upload zip to release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload ${{ needs.read-style-css.outputs.version }} "${{ needs.read-style-css.outputs.text_domain }}.zip"
+  
+  create-data-json:
+    name: Create data.json
+    needs: [ read-style-css ]
+    if: ${{ needs.read-style-css.outputs.changed == 'true' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Create Directory
+        run: |
+          mkdir public
+      - name: Create data.json
+        run: |
+          cat > public/data.json <<EOF
+          {
+            "version": "${{ needs.read-style-css.outputs.version }}",
+            "download_url": "https://github.com/juve33/misi-theme/releases/latest/download/misi.zip",
+            "requires": "${{ needs.read-style-css.outputs.requires }}",
+            "tested": "${{ needs.read-style-css.outputs.tested }}"
+          }
+          EOF
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: public
+          path: public
+
+  deploy:
+    name: Deploy
+    needs: [ read-style-css, create-data-json, build ]
+    if: ${{ needs.read-style-css.outputs.changed == 'true' }}
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Setup Pages
+        uses: actions/configure-pages@v6
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: public
+          path: public
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: public
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
