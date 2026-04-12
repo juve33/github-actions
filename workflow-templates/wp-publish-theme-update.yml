@@ -6,10 +6,8 @@ on:
 
 jobs:
   publish:
-    runs-on: ubuntu-latest
+    uses: juve33/.github/.github/workflows/wp-publish-theme-update.yml@main
     permissions:
       contents: write
       pages: write
       id-token: write
-    steps:
-      - uses: juve33/workflows/.github/workflows/wp-publish-theme-update.yml@main
