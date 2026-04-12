@@ -36,6 +36,7 @@ function setOutput(name, value) {
     process.env.GITHUB_OUTPUT,
     `${name}=${value}\n`
   );
+  console.log(`${name}=${value}`);
 }
 
 
