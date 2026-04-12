@@ -61,12 +61,14 @@ if (!current.version) {
 let previous = { version: '' };
 
 try {
-  const oldContent = execSync(`git show HEAD~1:${stylePath}`, {
+  const oldContent = execSync(`git show HEAD~1:style.css`, {
     encoding: 'utf8',
     stdio: ['pipe', 'pipe', 'ignore']
   });
   previous = parseTheme(oldContent);
-} catch (e) {}
+} catch (e) {
+  console.error("git show failed:", e.message);
+}
 
 
 console.log(`previous version=${previous.version}`);
