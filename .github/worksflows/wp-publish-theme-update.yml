@@ -27,7 +27,7 @@ jobs:
           fetch-depth: 2
       - name: Parse style.css
         id: parse-style-css
-        uses: juve33/workflows/.github/actions/wp-parse-style-css@main
+        uses: juve33/.github/.github/actions/wp-parse-style-css@main
 
   create-release:
     name: Create Release
