@@ -6,7 +6,7 @@ on:
 
 jobs:
   publish:
-    uses: juve33/.github/.github/workflows/wp-publish-theme-update.yml@main
+    uses: juve33/github-actions/.github/workflows/wp-publish-theme-update.yml@main
     permissions:
       contents: write
       pages: write

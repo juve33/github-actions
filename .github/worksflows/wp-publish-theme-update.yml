@@ -27,7 +27,7 @@ jobs:
           fetch-depth: 2
       - name: Parse style.css
         id: parse-style-css
-        uses: juve33/.github/.github/actions/wp-parse-style-css@main
+        uses: juve33/github-actions/.github/actions/wp-parse-style-css@main
 
   create-release:
     name: Create Release
@@ -86,7 +86,7 @@ jobs:
           cat > public/data.json <<EOF
           {
             "version": "${{ needs.read-style-css.outputs.version }}",
-            "download_url": "https://github.com/juve33/misi-theme/releases/latest/download/misi.zip",
+            "download_url": "https://github.com/${{ github.repository }}/releases/latest/download/${{ needs.read-style-css.outputs.text_domain }}.zip",
             "requires": "${{ needs.read-style-css.outputs.requires }}",
             "tested": "${{ needs.read-style-css.outputs.tested }}"
           }
